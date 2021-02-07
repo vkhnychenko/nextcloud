@@ -1,1 +1,6 @@
 .env.db
+.env
+.gitignore
+logs
+nextcloud
+databases
