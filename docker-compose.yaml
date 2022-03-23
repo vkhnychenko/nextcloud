@@ -30,17 +30,22 @@ services:
   #     - /etc/localtime:/etc/localtime:ro
   #     - ./certbot/conf:/etc/letsencrypt:rw
   #     - ./certbot/www:/var/www/certbot:rw
-  nextcloud:
+  db:
+    image: postgres
     restart: unless-stopped
-    image: nextcloud:fpm-alpine
-    ports:
-    - "127.0.0.1:9000:9000"
     volumes:
-    - ./nextcloud:/var/www/html:rw
-  mariadb:
-    restart: unless-stopped
-    image: mariadb:latest
-    volumes:
-      - ./databases/mariadb:/var/lib/mysql
+      - ./databases/data:/var/lib/postgresql/data
     env_file:
       - .env.db
+  nextcloud:
+    image: nextcloud:fpm
+    restart: unless-stopped
+    # ports:
+    #   - "127.0.0.1:9000:9000"
+    volumes:
+      - ./nextcloud:/var/www/html:rw
+    env_file:
+      - .env
+    depends_on:
+      - db
+  
