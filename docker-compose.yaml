@@ -16,6 +16,8 @@ services:
       - ./nextcloud:/var/www/html:ro
       - ./logs/nginx:/var/log/nginx
       - ./configs/nginx/certs:/etc/ssl/certs
+    depends_on:
+      - nextcloud
   # certbot:
   #   restart: unless-stopped
   #   image: certbot/certbot:latest
