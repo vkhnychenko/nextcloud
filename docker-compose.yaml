@@ -10,9 +10,9 @@ services:
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     volumes:
       - ./configs/nginx/conf.d:/etc/nginx/conf.d:ro
-      # - ./configs/nginx/certbot:/etc/nginx/certbot:ro
-      # - ./configs/certbot/conf:/etc/letsencrypt:rw
-      # - ./configs/certbot/www:/var/www/certbot:rw
+      - ./configs/nginx/certbot:/etc/nginx/certbot:ro
+      - ./configs/certbot/conf:/etc/letsencrypt:rw
+      - ./configs/certbot/www:/var/www/certbot:rw
       - ./nextcloud:/var/www/html:ro
       - ./logs/nginx:/var/log/nginx
       - ./configs/nginx/certs:/etc/ssl/certs
