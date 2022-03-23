@@ -6,7 +6,7 @@ services:
     image: nginx:latest
     ports:
     - 8303:80
-    - 444:443
+    - 444:444
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     volumes:
       - ./configs/nginx/conf.d:/etc/nginx/conf.d:ro
