@@ -1,15 +1,12 @@
 version: '3.9'
 
 networks:
-  traefic:
+  proxy:
     external: true
-    name: traefic
-  nextcloud:
-    name: nextcloud
 
 services:
   nextcloud:
-      image: nextcloud:24.0-fpm
+      image: nextcloud:stable
       container_name: "nextcloud"
       restart: unless-stopped
       volumes:
@@ -19,14 +16,17 @@ services:
       depends_on:
         - db
       networks:
-        - traefic
-        - nextcloud
+        - proxy
+        - default
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.whoami.rule=Host(`${HOST}`)"
-        - "traefik.http.routers.whoami.entrypoints=web,websecure"
-        - "traefik.http.routers.whoami.tls=true"
-        - "traefik.http.routers.whoami.tls.certresolver=production"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.nextcloud-secure.entrypoints=web,websecure"
+        - "traefik.http.routers.nextcloud-secure.rule=Host(`${HOST}`)"
+        - "traefik.http.routers.nextcloud-secure.service=nextcloud-service"
+        - "traefik.http.routers.nextcloud-secure.tls=true"
+        - "traefik.http.routers.nextcloud-secure.tls.certresolver=production"
+        - "traefik.http.services.nextcloud-service.loadbalancer.server.port=80"
   db:
     image: postgres
     restart: always
@@ -36,4 +36,4 @@ services:
     env_file:
       - .env.db
     networks:
-      - nextcloud
+      - default
