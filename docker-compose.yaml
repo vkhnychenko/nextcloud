@@ -1,46 +1,39 @@
 version: '3.9'
 
+networks:
+  traefic:
+    external: true
+    name: traefic
+  nextcloud:
+    name: nextcloud
+
 services:
-  nginx:
-    restart: unless-stopped
-    image: nginx:latest
-    ports:
-    - 80:80
-    # - 444:444
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-    volumes:
-      - ./configs/nginx/conf.d:/etc/nginx/conf.d:ro
-      # - ./configs/nginx/certbot:/etc/nginx/certbot:ro
-      # - ./configs/certbot/conf:/etc/letsencrypt:rw
-      # - ./configs/certbot/www:/var/www/certbot:rw
-      - ./nextcloud:/var/www/html:ro
-      - ./logs/nginx:/var/log/nginx
-    depends_on:
-      - nextcloud
-  # certbot:
-  #   restart: unless-stopped
-  #   image: certbot/certbot:latest
-  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-  #   volumes:
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - ./certbot/conf:/etc/letsencrypt:rw
-  #     - ./certbot/www:/var/www/certbot:rw
+  nextcloud:
+      image: nextcloud:24.0-fpm
+      container_name: "nextcloud"
+      restart: unless-stopped
+      volumes:
+        - ./nextcloud:/var/www/html:rw
+      env_file:
+        - .env
+      depends_on:
+        - db
+      networks:
+        - traefic
+        - nextcloud
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.whoami.rule=Host(`${HOST}`)"
+        - "traefik.http.routers.whoami.entrypoints=web,websecure"
+        - "traefik.http.routers.whoami.tls=true"
+        - "traefik.http.routers.whoami.tls.certresolver=production"
   db:
     image: postgres
-    restart: unless-stopped
+    restart: always
+    container_name: "nextcloud-database"
     volumes:
-      - ./databases/data:/var/lib/postgresql/data
+      - ./database:/var/lib/postgresql/data
     env_file:
       - .env.db
-  nextcloud:
-    image: nextcloud:fpm
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:9000:9000"
-    volumes:
-      - ./nextcloud:/var/www/html:rw
-    env_file:
-      - .env
-    depends_on:
-      - db
-  
+    networks:
+      - nextcloud

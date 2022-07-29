@@ -3,4 +3,4 @@
 .gitignore
 logs
 nextcloud
-databases
+database
