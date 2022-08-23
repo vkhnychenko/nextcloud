@@ -5,6 +5,8 @@ services:
       image: nextcloud:stable
       container_name: "nextcloud"
       restart: unless-stopped
+      ports:
+        - "80:80"
       volumes:
         - ./nextcloud:/var/www/html:rw
       env_file:
